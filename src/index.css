@@ -8,41 +8,41 @@
 
 @layer base {
   :root {
-    /* Brutalist Color Palette - Stark contrasts */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 8%;
+    /* DECODET Color Palette - Blue & Orange Theme */
+    --background: 240 5% 96%;
+    --foreground: 210 100% 25%;
 
-    --card: 0 0% 95%;
-    --card-foreground: 0 0% 8%;
+    --card: 240 8% 92%;
+    --card-foreground: 210 100% 25%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
+    --popover-foreground: 210 100% 25%;
 
-    --primary: 0 0% 8%;
+    --primary: 210 100% 45%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 85%;
-    --secondary-foreground: 0 0% 8%;
+    --secondary: 18 95% 60%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 35%;
+    --muted: 210 20% 85%;
+    --muted-foreground: 210 50% 35%;
 
-    --accent: 0 0% 12%;
+    --accent: 18 95% 60%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 65% 45%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 95%;
-    --ring: 0 0% 8%;
+    --border: 210 100% 25%;
+    --input: 240 8% 92%;
+    --ring: 210 100% 45%;
 
     --radius: 0rem;
 
-    /* Brutalist specific tokens */
-    --brutal-accent: 45 85% 55%;
+    /* DECODET specific tokens */
+    --brutal-accent: 18 95% 60%;
     --brutal-warning: 25 95% 53%;
-    --brutal-grid: 0 0% 85%;
+    --brutal-grid: 210 20% 85%;
     
     /* Heavy shadows for depth */
     --brutal-shadow: 8px 8px 0px hsl(var(--foreground));

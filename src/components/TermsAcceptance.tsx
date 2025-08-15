@@ -51,8 +51,15 @@ const TermsAcceptance = () => {
   return (
     <div className="min-h-screen brutal-grid bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
+        {/* Header with Logo */}
         <div className="text-center mb-12">
+          <div className="mb-8">
+            <img 
+              src="/lovable-uploads/e831994f-422d-4ff4-a5b2-a3a0e85e5063.png" 
+              alt="DECODET Logo" 
+              className="h-16 md:h-20 mx-auto mb-4"
+            />
+          </div>
           <h1 className="brutal-title mb-4">TERMS &amp; CONDITIONS</h1>
           <div className="brutal-box p-4 inline-block">
             <p className="brutal-text text-brutal-warning font-bold">
