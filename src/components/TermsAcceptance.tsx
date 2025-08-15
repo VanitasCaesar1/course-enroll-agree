@@ -3,25 +3,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { termsAcceptanceService } from "@/utils/supabase";
 
 const TermsAcceptance = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     mobile: "",
-    accepted: false
+    accepted: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.email || !formData.mobile) {
       toast({
         title: "INCOMPLETE FORM",
         description: "All fields are mandatory. Complete the form.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -30,22 +31,36 @@ const TermsAcceptance = () => {
       toast({
         title: "TERMS NOT ACCEPTED",
         description: "You must accept the terms to proceed.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     setIsSubmitting(true);
-    
-    // Simulate submission - will be replaced with Supabase integration
-    setTimeout(() => {
+
+    try {
+      await termsAcceptanceService.create({
+        name: formData.name,
+        email: formData.email,
+        mobile: formData.mobile,
+      });
+
       toast({
         title: "SUBMISSION RECORDED",
         description: "Your acceptance has been logged in the system.",
       });
-      setIsSubmitting(false);
+
       setFormData({ name: "", email: "", mobile: "", accepted: false });
-    }, 1000);
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast({
+        title: "SUBMISSION FAILED",
+        description: "Unable to record your acceptance. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -54,10 +69,10 @@ const TermsAcceptance = () => {
         {/* Header with Logo */}
         <div className="text-center mb-12">
           <div className="mb-8">
-            <img 
-              src="/lovable-uploads/e831994f-422d-4ff4-a5b2-a3a0e85e5063.png" 
-              alt="DECODET Logo" 
-              className="h-16 md:h-20 mx-auto mb-4"
+            <img
+              src="/lovable-uploads/e831994f-422d-4ff4-a5b2-a3a0e85e5063.png"
+              alt="DECODET"
+              className="h-24 md:h-32 mx-auto mb-4"
             />
           </div>
           <h1 className="brutal-title mb-4">TERMS &amp; CONDITIONS</h1>
@@ -79,43 +94,46 @@ const TermsAcceptance = () => {
               <div className="border-l-4 border-foreground pl-4">
                 <p className="font-bold mb-2">COURSE FEE GUARANTEE:</p>
                 <p>
-                  By enrolling in this course, the student agrees that the course fee 
-                  specified at the time of registration is final and will not be increased 
-                  under any circumstances until the completion of the course.
+                  By enrolling in this course, the student agrees that the
+                  course fee specified at the time of registration is final and
+                  will not be increased under any circumstances until the
+                  completion of the course.
                 </p>
               </div>
 
               <div className="border-l-4 border-foreground pl-4">
                 <p className="font-bold mb-2">CERTIFICATION TERMS:</p>
                 <p>
-                  Students will receive an internship certificate based on their performance 
-                  during the course and internship period, and a course completion certificate 
-                  will be awarded to all students upon successfully completing the program, 
-                  in collaboration with our partnered companies.
+                  Students will receive an internship certificate based on their
+                  performance during the course and internship period, and a
+                  course completion certificate will be awarded to all students
+                  upon successfully completing the program, in collaboration
+                  with our partnered companies.
                 </p>
               </div>
 
               <div className="border-l-4 border-foreground pl-4">
                 <p className="font-bold mb-2">ATTENDANCE REQUIREMENTS:</p>
                 <p>
-                  Students are expected to attend classes regularly, actively participate 
-                  in learning activities, and complete assigned tasks to ensure the best outcomes.
+                  Students are expected to attend classes regularly, actively
+                  participate in learning activities, and complete assigned
+                  tasks to ensure the best outcomes.
                 </p>
               </div>
 
               <div className="border-l-4 border-foreground pl-4">
                 <p className="font-bold mb-2">PROMOTIONAL SUPPORT:</p>
                 <p>
-                  Students are encouraged to support our growth by promoting the course 
-                  to friends or peers who may benefit from it.
+                  Students are encouraged to support our growth by promoting the
+                  course to friends or peers who may benefit from it.
                 </p>
               </div>
 
               <div className="brutal-box bg-brutal-warning/20 p-4 border-brutal-warning">
                 <p className="font-bold">
-                  By accepting these terms and conditions, the student confirms that they 
-                  have read, understood, and agreed to abide by the above terms for the 
-                  entire duration of the course.
+                  By accepting these terms and conditions, the student confirms
+                  that they have read, understood, and agreed to abide by the
+                  above terms for the entire duration of the course.
                 </p>
               </div>
             </div>
@@ -123,10 +141,8 @@ const TermsAcceptance = () => {
 
           {/* Registration Form */}
           <div className="brutal-box p-8">
-            <h2 className="brutal-subtitle mb-6">
-              REGISTER YOUR ACCEPTANCE
-            </h2>
-            
+            <h2 className="brutal-subtitle mb-6">REGISTER YOUR ACCEPTANCE</h2>
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="brutal-text font-bold block mb-2">
@@ -135,7 +151,9 @@ const TermsAcceptance = () => {
                 <Input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="brutal-input h-12 text-lg"
                   placeholder="Enter your complete name"
                   required
@@ -149,7 +167,9 @@ const TermsAcceptance = () => {
                 <Input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="brutal-input h-12 text-lg"
                   placeholder="your.email@domain.com"
                   required
@@ -163,7 +183,9 @@ const TermsAcceptance = () => {
                 <Input
                   type="tel"
                   value={formData.mobile}
-                  onChange={(e) => setFormData({...formData, mobile: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, mobile: e.target.value })
+                  }
                   className="brutal-input h-12 text-lg"
                   placeholder="+1234567890"
                   required
@@ -175,15 +197,18 @@ const TermsAcceptance = () => {
                   <Checkbox
                     id="accept-terms"
                     checked={formData.accepted}
-                    onCheckedChange={(checked) => 
-                      setFormData({...formData, accepted: checked as boolean})
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, accepted: checked as boolean })
                     }
                     className="mt-1 border-2 border-foreground data-[state=checked]:bg-foreground"
                   />
-                  <label htmlFor="accept-terms" className="brutal-text font-bold cursor-pointer">
-                    I HAVE READ, UNDERSTOOD, AND AGREE TO ALL TERMS AND CONDITIONS 
-                    STATED ABOVE. I ACCEPT FULL RESPONSIBILITY FOR COMPLIANCE WITH 
-                    THESE TERMS.
+                  <label
+                    htmlFor="accept-terms"
+                    className="brutal-text font-bold cursor-pointer"
+                  >
+                    I HAVE READ, UNDERSTOOD, AND AGREE TO ALL TERMS AND
+                    CONDITIONS STATED ABOVE. I ACCEPT FULL RESPONSIBILITY FOR
+                    COMPLIANCE WITH THESE TERMS.
                   </label>
                 </div>
               </div>
@@ -199,8 +224,8 @@ const TermsAcceptance = () => {
 
             <div className="mt-6 p-4 border-2 border-brutal-warning bg-brutal-warning/10">
               <p className="brutal-text font-bold text-brutal-warning">
-                WARNING: This is a legally binding agreement. Ensure all information 
-                is accurate before submission.
+                WARNING: This is a legally binding agreement. Ensure all
+                information is accurate before submission.
               </p>
             </div>
           </div>

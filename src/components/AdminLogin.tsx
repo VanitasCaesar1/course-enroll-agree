@@ -2,15 +2,17 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { adminService } from "@/utils/supabase";
 
 interface AdminLoginProps {
   onLogin: (success: boolean) => void;
+  onBack?: () => void;
 }
 
-const AdminLogin = ({ onLogin }: AdminLoginProps) => {
+const AdminLogin = ({ onLogin, onBack }: AdminLoginProps) => {
   const [credentials, setCredentials] = useState({
     username: "",
-    password: ""
+    password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -19,9 +21,13 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Temporary hardcoded auth - will be replaced with Supabase
-    setTimeout(() => {
-      if (credentials.username === "admin" && credentials.password === "admin123") {
+    try {
+      const result = await adminService.authenticate(
+        credentials.username,
+        credentials.password
+      );
+
+      if (result.success) {
         toast({
           title: "ACCESS GRANTED",
           description: "Admin authentication successful.",
@@ -31,16 +37,37 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
         toast({
           title: "ACCESS DENIED",
           description: "Invalid credentials. Try again.",
-          variant: "destructive"
+          variant: "destructive",
         });
         onLogin(false);
       }
+    } catch (error) {
+      console.error("Authentication error:", error);
+      toast({
+        title: "AUTHENTICATION ERROR",
+        description: "Unable to verify credentials. Try again.",
+        variant: "destructive",
+      });
+      onLogin(false);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
     <div className="min-h-screen brutal-grid bg-background flex items-center justify-center">
+      {/* Back Button */}
+      {onBack && (
+        <div className="fixed top-6 left-6">
+          <Button
+            onClick={onBack}
+            className="brutal-box-hover h-12 px-6 brutal-text font-bold uppercase bg-card hover:bg-card text-foreground border-2 border-foreground"
+          >
+            ← BACK TO TERMS
+          </Button>
+        </div>
+      )}
+
       <div className="brutal-box p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-black tracking-tighter uppercase mb-2">
@@ -51,13 +78,13 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="brutal-text font-bold block mb-2">
-              USERNAME
-            </label>
+            <label className="brutal-text font-bold block mb-2">USERNAME</label>
             <Input
               type="text"
               value={credentials.username}
-              onChange={(e) => setCredentials({...credentials, username: e.target.value})}
+              onChange={(e) =>
+                setCredentials({ ...credentials, username: e.target.value })
+              }
               className="brutal-input h-12"
               placeholder="Enter admin username"
               required
@@ -65,13 +92,13 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
           </div>
 
           <div>
-            <label className="brutal-text font-bold block mb-2">
-              PASSWORD
-            </label>
+            <label className="brutal-text font-bold block mb-2">PASSWORD</label>
             <Input
               type="password"
               value={credentials.password}
-              onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+              onChange={(e) =>
+                setCredentials({ ...credentials, password: e.target.value })
+              }
               className="brutal-input h-12"
               placeholder="Enter admin password"
               required
@@ -89,9 +116,10 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
 
         <div className="mt-6 p-4 border-2 border-brutal-warning bg-brutal-warning/10">
           <p className="brutal-text text-xs text-center">
-            AUTHORIZED PERSONNEL ONLY<br/>
+            AUTHORIZED PERSONNEL ONLY
+            <br />
             <span className="text-brutal-warning font-bold">
-              Demo: admin / admin123
+              Please contact Admin for any issues.
             </span>
           </p>
         </div>

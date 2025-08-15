@@ -21,7 +21,7 @@ const Index = () => {
   };
 
   if (currentView === "admin-login") {
-    return <AdminLogin onLogin={handleAdminLogin} />;
+    return <AdminLogin onLogin={handleAdminLogin} onBack={() => setCurrentView("terms")} />;
   }
 
   if (currentView === "admin-dashboard" && isAdminAuthenticated) {

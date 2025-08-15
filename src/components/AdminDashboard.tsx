@@ -1,63 +1,67 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { termsAcceptanceService } from "@/utils/supabase";
+import { Database } from "@/types/database";
 
 interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-// Mock data - will be replaced with Supabase queries
-const mockUsers = [
-  {
-    id: 1,
-    name: "JOHN SMITH",
-    email: "john.smith@email.com",
-    mobile: "+1234567890",
-    acceptedAt: "2024-08-15 14:30:00",
-    status: "ACCEPTED"
-  },
-  {
-    id: 2,
-    name: "JANE DOE",
-    email: "jane.doe@email.com",
-    mobile: "+1987654321",
-    acceptedAt: "2024-08-15 15:45:00",
-    status: "ACCEPTED"
-  },
-  {
-    id: 3,
-    name: "MIKE JOHNSON",
-    email: "mike.j@email.com",
-    mobile: "+1122334455",
-    acceptedAt: "2024-08-15 16:20:00",
-    status: "ACCEPTED"
-  }
-];
+type TermsAcceptance = Database['public']['Tables']['terms_acceptances']['Row'];
 
 const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState(mockUsers);
+  const [allUsers, setAllUsers] = useState<TermsAcceptance[]>([]);
+  const [searchResults, setSearchResults] = useState<TermsAcceptance[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const handleSearch = () => {
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const users = await termsAcceptanceService.getAll();
+      setAllUsers(users);
+      setSearchResults(users);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      toast({
+        title: "LOADING FAILED",
+        description: "Unable to load user data from database.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = async () => {
     if (!searchQuery.trim()) {
-      setSearchResults(mockUsers);
+      setSearchResults(allUsers);
       return;
     }
 
-    const filtered = mockUsers.filter(user => 
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.mobile.includes(searchQuery)
-    );
-
-    setSearchResults(filtered);
-    
-    toast({
-      title: "SEARCH EXECUTED",
-      description: `Found ${filtered.length} matching records.`,
-    });
+    try {
+      const filtered = await termsAcceptanceService.search(searchQuery);
+      setSearchResults(filtered);
+      
+      toast({
+        title: "SEARCH EXECUTED",
+        description: `Found ${filtered.length} matching records.`,
+      });
+    } catch (error) {
+      console.error('Search error:', error);
+      toast({
+        title: "SEARCH FAILED",
+        description: "Unable to search database.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -111,7 +115,13 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
             </div>
           </div>
 
-          {searchResults.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="brutal-text text-muted-foreground text-xl">
+                LOADING RECORDS...
+              </p>
+            </div>
+          ) : searchResults.length === 0 ? (
             <div className="text-center py-12">
               <p className="brutal-text text-muted-foreground text-xl">
                 NO MATCHING RECORDS FOUND
@@ -140,11 +150,13 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                       <td className="p-4 brutal-text font-bold">{user.name}</td>
                       <td className="p-4 brutal-text">{user.email}</td>
                       <td className="p-4 brutal-text">{user.mobile}</td>
-                      <td className="p-4 brutal-text">{user.acceptedAt}</td>
+                      <td className="p-4 brutal-text">
+                        {new Date(user.accepted_at).toLocaleString()}
+                      </td>
                       <td className="p-4">
                         <div className="brutal-box bg-brutal-accent/20 px-3 py-1 inline-block">
                           <span className="brutal-text font-bold text-xs">
-                            {user.status}
+                            ACCEPTED
                           </span>
                         </div>
                       </td>
@@ -159,7 +171,7 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
         {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           <div className="brutal-box p-6 text-center">
-            <h3 className="text-3xl font-black mb-2">{mockUsers.length}</h3>
+            <h3 className="text-3xl font-black mb-2">{allUsers.length}</h3>
             <p className="brutal-text font-bold">TOTAL ACCEPTANCES</p>
           </div>
           <div className="brutal-box p-6 text-center">
@@ -167,14 +179,14 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
             <p className="brutal-text font-bold">COMPLIANCE RATE</p>
           </div>
           <div className="brutal-box p-6 text-center">
-            <h3 className="text-3xl font-black mb-2 text-brutal-warning">ACTIVE</h3>
-            <p className="brutal-text font-bold">SYSTEM STATUS</p>
+            <h3 className="text-3xl font-black mb-2 text-brutal-warning">LIVE</h3>
+            <p className="brutal-text font-bold">DATABASE STATUS</p>
           </div>
         </div>
 
-        <div className="mt-8 p-4 border-2 border-brutal-warning bg-brutal-warning/10">
-          <p className="brutal-text font-bold text-center">
-            DATABASE INTEGRATION REQUIRED: Connect Supabase to enable live data functionality
+        <div className="mt-8 p-4 border-2 border-green-500 bg-green-500/10">
+          <p className="brutal-text font-bold text-center text-green-700">
+            ✓ SUPABASE INTEGRATION ACTIVE: Real-time data synchronization enabled
           </p>
         </div>
       </div>
